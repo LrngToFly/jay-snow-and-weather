@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jay Snow &amp; Weather</title>
+<meta name="description" content="Snowmaking hours, wet-bulb and model forecasts for Jay Peak's village and summit.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Jay Snow">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d2240">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hero-top">
+  <canvas id="snowfall" aria-hidden="true"></canvas>
+  <svg class="ridge" viewBox="0 0 400 70" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 70 L0 52 L40 44 L78 50 L120 30 L150 38 L196 8 L232 26 L262 20 L300 40 L340 34 L400 48 L400 70 Z" fill="#163a63"/>
+    <path d="M181 18 L196 8 L214 19 L205 17 L198 22 L190 17 Z M112 35 L120 30 L130 36 L124 35 L119 38 Z M255 23 L262 20 L271 25 L264 24 Z" fill="#eef6ff"/>
+    <path d="M0 70 L0 60 L60 56 L110 62 L170 50 L220 58 L280 52 L340 60 L400 56 L400 70 Z" style="fill:var(--bg)"/>
+  </svg>
+  <div class="top">
+    <div>
+      <h1><svg class="flake" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7"/><path d="M9.5 3.5L12 6l2.5-2.5M9.5 20.5L12 18l2.5 2.5M3.6 10.4l3.4-.9-.9-3.4M20.4 13.6l-3.4.9.9 3.4M6.1 17.9l.9-3.4-3.4-.9M17.9 6.1l-.9 3.4 3.4.9"/></g></svg>Jay Snow &amp; Weather</h1>
+      <div class="sub">Jay Peak, VT · <span id="updated"></span></div>
+    </div>
+    <div class="actions">
+      <button id="open-links" class="icon-btn" type="button" aria-label="Jay Peak links">
+        <svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"><path d="M2 20l6.5-11 4 6 3-4.5L22 20z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M6.6 12.2l1.9-3.2 1.9 2.9" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg>
+      </button>
+      <button id="refresh" class="icon-btn" type="button" aria-label="Refresh">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button id="open-settings" class="icon-btn" type="button" aria-label="Settings">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="update" class="banner tip" hidden><span>A new version of the app is ready.</span><button id="update-reload" type="button" class="btn">Reload</button></div>
+
+  <div id="colA">
+    <section class="card" id="summary">
+      <h2>Snowmaking hours <span class="chip">wet-bulb</span></h2>
+      <div id="summary-body"><p class="muted">Loading…</p></div>
+    </section>
+    <section class="card" id="models">
+      <h2>By model</h2>
+      <div id="models-body"></div>
+    </section>
+    <section class="card" id="days">
+      <h2>Day by day</h2>
+      <div id="days-body"></div>
+    </section>
+  </div>
+
+  <div id="colB">
+    <section class="card" id="wb-card">
+      <h2>Wet-bulb, every model</h2>
+      <div id="site-seg" class="seg seg2" role="tablist" aria-label="Elevation"></div>
+      <div class="cwrap"><canvas id="wb-chart" aria-label="Wet-bulb chart"></canvas></div>
+      <div id="wb-leg" class="hleg"></div>
+      <p class="small muted">Past 7 days on the left of "now", next 7 on the right. Shading: below 20°F full-rate snowmaking; lighter band, part rate. Tap the chart to read it.</p>
+    </section>
+    <section class="card" id="det-card">
+      <h2>One model up close</h2>
+      <div id="model-seg" class="seg seg5" role="tablist" aria-label="Model"></div>
+      <div class="cwrap"><canvas id="det-chart" aria-label="Model detail chart"></canvas></div>
+      <div id="det-leg" class="hleg"></div>
+      <p id="det-note" class="small muted"></p>
+    </section>
+    <section class="card" id="inv-card">
+      <h2>Inversions</h2>
+      <div id="inv-seg" class="seg seg5" role="tablist" aria-label="Model"></div>
+      <div class="cwrap"><canvas id="inv-chart" aria-label="Inversion chart"></canvas></div>
+      <div id="inv-leg" class="hleg"></div>
+      <p id="inv-note" class="small muted"></p>
+    </section>
+    <section class="card" id="links-card">
+      <h2>From Jay Peak</h2>
+      <div class="links" id="links-list"></div>
+    </section>
+  </div>
+
+  <footer class="small muted">
+    Forecasts: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (ECMWF, NOAA GFS, AIFS, AIGFS and RRFS open data, CC BY 4.0), corrected to each elevation.
+    Village readings: Weather Underground station IJAY3. Snowmaking hours are an estimate from wet-bulb, not Jay's actual operations.
+  </footer>
+</main>
+
+<dialog id="links-dlg" aria-label="Jay Peak links">
+  <div class="dlg-body">
+    <div class="dlg-h"><h2>Jay Peak</h2><button type="button" class="icon-btn" data-close aria-label="Close">✕</button></div>
+    <div class="links" id="links-dlg-list"></div>
+    <p class="small muted">Jay's site doesn't allow itself to be shown inside another app, so these open in Safari. Swipe back or tap Done to return.</p>
+  </div>
+</dialog>
+
+<dialog id="settings" aria-label="Settings">
+  <div class="dlg-body settings-form">
+    <div class="dlg-h"><h2>Settings</h2><button type="button" class="icon-btn" data-close aria-label="Close">✕</button></div>
+    <label>Screen layout
+      <select id="set-layout">
+        <option value="auto">Automatic</option>
+        <option value="phone">Phone (one column)</option>
+        <option value="tablet">iPad (wide)</option>
+      </select>
+    </label>
+    <p class="small muted">Snowmaking thresholds, the opening target, water numbers and the two locations are in <code>js/config.js</code> in the GitHub repo.</p>
+    <div id="cfg-summary" class="small"></div>
+    <details><summary>Diagnostics</summary><pre id="diag-log" class="out small"></pre></details>
+    <div class="row end"><button type="button" class="btn primary" id="save-settings">Save</button></div>
+  </div>
+</dialog>
+
+<script src="js/config.js"></script>
+<script src="js/core.js"></script>
+<script src="js/snow.js"></script>
+<script src="js/data.js"></script>
+<script src="js/summary.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

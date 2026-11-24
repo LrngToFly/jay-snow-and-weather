@@ -1,0 +1,44 @@
+# Saves IJAY3's hourly readings every hour to the "data" branch, which the app reads.
+# Needs one repository secret: WU_API_KEY (Settings > Secrets and variables > Actions > New repository secret).
+# The data branch is rewritten as a single commit each time, so it stays small and main's history stays clean.
+name: Save IJAY3 readings
+
+on:
+  schedule:
+    - cron: '17 * * * *'   # every hour at :17 (GitHub may run it a few minutes late)
+  workflow_dispatch:        # "Run workflow" button on the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ijay3
+  cancel-in-progress: false
+
+jobs:
+  save:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get the saved archive
+        run: |
+          mkdir -p prev out
+          if git fetch --depth 1 origin data 2>/dev/null; then
+            git show FETCH_HEAD:ijay3-archive.json > prev/ijay3-archive.json 2>/dev/null || true
+          fi
+
+      - name: Download from Weather Underground
+        env:
+          WU_API_KEY: ${{ secrets.WU_API_KEY }}
+        run: python3 scripts/fetch_ijay3.py out prev/ijay3-archive.json
+
+      - name: Publish to the data branch
+        run: |
+          cd out
+          git init -q -b data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ijay3.json ijay3-archive.json
+          git commit -q -m "IJAY3 readings $(date -u +'%Y-%m-%d %H:%M') UTC"
+          git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" data
